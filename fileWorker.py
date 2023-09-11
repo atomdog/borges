@@ -15,6 +15,7 @@ import threading
 import queue
 import os
 
+
 class worker(threading.Thread):
     def __init__(self, filename, iq, oq):
         print("spawning worker for " + filename)
@@ -32,6 +33,7 @@ class worker(threading.Thread):
         self.stop_issued = threading.Event()
 
         #opx, clx, dsc, apr, gra, gca, dlo
+        #open, close, describe, append row, get row at, get column at, deload (close file)
         self.control = {    "opx": lambda self: self.openFile(),
                              "clx": lambda self: self.closeFile(),
                              "dsc": lambda self: self.describeFile(),
@@ -42,7 +44,7 @@ class worker(threading.Thread):
         
         pass
 
-    # file io methods
+    # file io functions
 
     def fileExists(self):
         file_exists = os.path.exists("data/"+self.filename+".h5")
@@ -117,23 +119,34 @@ class worker(threading.Thread):
 
     #thread methods
 
+    #thread runtime
     def run(self):
         try:
             breaker=False
-            while(not breaker):    
-                controlflow = self._iqueue.get()
-                print(controlflow)
-                if(controlflow in self.control):
+            #enter into thread runtime
+            while(not breaker):
+                #do while breaker is not tripped by one of the kill conditions
+                #if the request queue is not empty
+                if(not self._iqueue.empty()):
+                    args = None
+                    #get the controlcode passed to the thread    
+                    cflow = self._iqueue.get()
+                    #if a list w/ arguments is passed, split and run with arguments
+                    if isinstance(cflow, list):
+                        controlflow, args = cflow[0], cflow[1]
+                    else:
+                        controlflow = cflow
                     try:
-                        o = self.control[controlflow](self)
+                        if(args is not None):
+                            o = self.control[controlflow](self, args)
+                        else:
+                            o = self.control[controlflow](self)
+                        #place on output queue
                         self._oqueue.put(o)
                         time.sleep(0.1)
                     except Exception as e:
-                        print(e)
+                        self._oqueue.put(e)
                         pass
-                    #insert lambda 
-                    
-                
             if self.stopped():
                 return
             else:
