@@ -34,7 +34,7 @@ class worker(threading.Thread):
 
         #opx, clx, dsc, apr, gra, gca, dlo
         #open, close, describe, append row, get row at, get column at, deload (close file)
-        self.control = {    "opx": lambda self: self.openFile(),
+        self.control = {     "opx": lambda self: self.openFile(),
                              "clx": lambda self: self.closeFile(),
                              "dsc": lambda self: self.describeFile(),
                              "apr": lambda self, r: self.appendRow(r),

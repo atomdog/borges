@@ -62,16 +62,26 @@ class line:
         #print("Sending... ", call)
         await socket.send(msg)
         
-    async def main(self):
+    async def main_s(self):
         #sends, and then waits for the response
         await asyncio.gather(self.outgoing(),self.incoming())
         self.return_value = await self.incoming_request_queue.get()
 
-    def run(self, call):
+    async def main_r(self):
+        #waits for incoming, and then sends response
+        await asyncio.gather(self.incoming(), self.outgoing())
+        self.return_value = await self.incoming_request_queue.get()
+
+    def send(self, call):
         self.call = call
-        asyncio.run(self.main())
+        asyncio.run(self.main_s())
         return(pickle.loads(self.return_value))
-        
+
+    def receive(self, call):
+        self.call = call
+        asyncio.run(self.main_r())
+        return(pickle.loads(self.return_value))
+
     def close(self, call):
         self.call = call
         asyncio.run(self.main())

@@ -32,6 +32,8 @@ import post
 # notes:
 #
 #
+# create addresses for for different fileworkers and additional address for directory
+
 
 class dispatch:
     def __init__(self):
