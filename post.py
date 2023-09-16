@@ -6,12 +6,11 @@ from datetime import datetime
 import shutil
 import json
 import pandas as pd
-
+import threading
 import pickle
-import asyncio
 import zmq
-import zmq.asyncio
 import random 
+import threading
 
 def generate_request_id():
     a = random.random()
@@ -20,71 +19,70 @@ def generate_request_id():
     idv = hash(a*b*c)
     idv = hash(hash)
     return(idv)
-# a line opens a connection when a message needs to be sent and waits for the response before exiting
-# opens line, sends request, waits for response, closes
-class line:
-    def __init__(self, name):
-        self.incoming_request_queue = asyncio.Queue()
-        self.outgoing_request_queue = asyncio.Queue()
-        self.ctx = zmq.asyncio.Context()
-        self.request_id = generate_request_id()
-        
+
+class channel(threading.Thread):
+    def __init__(self, name, iq, oq):
+        print("launching line on channel: " + name)
+        self.stop_issued = threading.Event()
+        threading.Thread.__init__(self)
         self.name = name
-
-    #handles incoming requests
-    #waits for incoming requests and adds them to incoming request queue
-    #waits for a response. this is a one way pipe.
-
-    async def incoming(self):
-        ctx = self.ctx
-        socket = ctx.socket(zmq.PULL)
-        socket.connect('ipc:///tmp/'+self.name+'_inbound.pipe')
-        #print("Listening...")
-        this_response = False
-        while(not this_response):
-            msg = await socket.recv() # waits for msg to be ready
-            if(pickle.loads(msg)['REQ_ID'] == self.request_id):
-                await self.incoming_request_queue.put(msg)
-                this_response=True
-
-
-    #handles outgoing responses
-    #waits for outgoing request queue update and sends them to socket
-    async def outgoing(self):
-        ctx = self.ctx
-        #print("Outgoing connecting...")
-        socket = ctx.socket(zmq.PUSH)
-        socket.connect('ipc:///tmp/'+self.name+'_outbound.pipe')
-        #socket.send(msg)
-        call = self.call
+        self._iqueue = iq
+        self._oqueue = oq
+        self.ctx = zmq.Context()
         
-        msg = pickle.dumps(call)
-        #print("Sending... ", call)
-        await socket.send(msg)
-        
-    async def main_s(self):
-        #sends, and then waits for the response
-        await asyncio.gather(self.outgoing(),self.incoming())
-        self.return_value = await self.incoming_request_queue.get()
+    #thread methods
+    #thread runtime
+    def run(self):
+        try:
+            
+            o_socket = self.ctx.socket(zmq.PUSH)
+            o_socket.bind('ipc:///tmp/'+self.name+'.pipe')
+            print("output bound on channel: ", self.name)
+            i_socket = self.ctx.socket(zmq.PULL)
+            i_socket.bind('ipc:///tmp/'+self.name+'.pipe')
+            print("input bound on channel: ", self.name)
+            breaker=False
+            #enter into thread runtime
+            
+            while(not breaker):
+                    
+                #without blocking, check if there is a message being received by the socket
+                try:
+                    message = i_socket.recv(flags=zmq.NOBLOCK)
+                    print(message)
+                except Exception as e:
+                    print(e)
+                    message = None
+                if(message!=None):
+                    print(message)
+                    self._iqueue.put(message)
+                    pass
+                
+                if(not self._oqueue.empty()):
+                    
+                    ob = self._oqueue.get()
+                    print(ob)
+                    msg = pickle.dumps(ob)
+                    print(msg)
+                    o_socket.send(msg)
 
-    async def main_r(self):
-        #waits for incoming, and then sends response
-        await asyncio.gather(self.incoming(), self.outgoing())
-        self.return_value = await self.incoming_request_queue.get()
+            if self.stopped():
+                return
+            else:
+                self.stop()
+                breaker=True
+            return
+        except Exception as e:
+            print(e)
+            self.stop()
+            return(-1)
 
-    def send(self, call):
-        self.call = call
-        asyncio.run(self.main_s())
-        return(pickle.loads(self.return_value))
-
-    def receive(self, call):
-        self.call = call
-        asyncio.run(self.main_r())
-        return(pickle.loads(self.return_value))
-
-    def close(self, call):
-        self.call = call
-        asyncio.run(self.main())
-        return(pickle.loads(self.return_value))
-
-
+    def stop(self):
+        #set stop event
+        print("worker ", self.filename, " stopping")
+        self.closeFile()
+        self.stop_issued.set()
+    
+    def stopped(self):
+        #check if thread class event has been set
+        return self.stop_issued.is_set()
