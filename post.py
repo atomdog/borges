@@ -75,7 +75,7 @@ class channel(threading.Thread):
                         #check for a message, this will not block
 
                         message = socket.recv()
-
+                        print("- post -> inbound on "+self.name+" -> ")
                         r = pickle.loads(message)
                         #print(   next(o)+self.name+" -> ")
                         self._iqueue.put(r)

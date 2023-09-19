@@ -35,8 +35,28 @@ import threading
 #
 #
 # create addresses for for different fileworkers and additional address for directory
-
-
+def print_header():
+    banner = '''
+||                                                  ||
+||                                                  ||
+||⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬢⬡⬡⬡⬡⬢⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬢⬡⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬢⬢⬢⬢⬡⬡⬡⬢⬢⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬢⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬡⬢⬢⬡⬢⬢⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬢⬢⬢⬢⬢⬡⬡⬢⬢⬢⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬢⬢⬡⬡⬢⬢⬢⬢⬡⬡⬢⬢⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬢⬡⬡⬡⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬢⬡⬡⬡⬡⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
+||                Data Management System            ||
+||                      AMG                         ||
+    '''
+    print(banner)
 class dispatch:
     def __init__(self):
         print("initializing dispatch...")
@@ -73,13 +93,23 @@ class dispatch:
             if file.endswith(".h5"):
                 available_files.append(file.split(".")[0])
         return(available_files)
+
+    def runtime(self):
+        while(True):
+            for i in self.channels.keys():
+                if(self.channels[i]['input'].empty() == False):
+                    rec = self.channels[i]['input'].get()
+                    print(rec)
+                
+
     
 
 
+if __name__ == "__main__":
 
-
-
-a = dispatch()
-time.sleep(10)
-a.exit()
+    print_header()
+    a = dispatch()
+    a.runtime()
+    #time.sleep(10)
+    #a.exit()
 #a.test()
