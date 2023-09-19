@@ -1,88 +1,117 @@
-import numpy as np
-import tables
-import matplotlib.pyplot as plt
-import os
-from datetime import datetime
-import shutil
-import json
-import pandas as pd
-import threading
-import pickle
+import asyncio
+import zmq.asyncio
+import pickle 
 import zmq
-import random 
+import json
+import time
 import threading
-
-def generate_request_id():
-    a = random.random()
-    b = random.random()
-    c = random.random()
-    idv = hash(a*b*c)
-    idv = hash(hash)
-    return(idv)
+import queue
 
 class channel(threading.Thread):
-    def __init__(self, name, iq, oq):
-        print("launching line on channel: " + name)
-        self.stop_issued = threading.Event()
+    def __init__(self, name, channel_type, iq, oq):
         threading.Thread.__init__(self)
         self.name = name
+        
         self._iqueue = iq
         self._oqueue = oq
+        if(channel_type == "server"):
+            self.incoming_label = 'requests'
+            self.outgoing_label = 'responses'
+        elif(channel_type == "client"):
+            self.incoming_label = 'responses'
+            self.outgoing_label = 'requests'
         self.ctx = zmq.Context()
+        self.stop_issued = threading.Event()
+
+        self.poller = zmq.Poller()
+        print("- post -> configured channel: "+ self.name)
+        pass
+
+                #print(message)
+            
+            
+
+    def out(self):
+        print("- post -> opening outbound channel", self.name)
+        sender = self.ctx.socket(zmq.PUSH)
         
-    #thread methods
-    #thread runtime
+        sender.connect('ipc:///tmp/'+self.name+'_'+self.outgoing_label+'.pipe')
+        print("- post -> opened outbound channel", self.name)
+        while(self.stop_issued.is_set() is False):
+            try: 
+                if(self._oqueue.empty() == False):
+                    msg = self._oqueue.get()
+                    print("- post -> outbound on "+self.name+" -> ")
+                    msg = pickle.dumps(msg)
+                    try:
+                        sender.send(msg)
+                    except Exception as e:
+                        print(e)
+                    #print(msg)
+            except:
+                pass
+
+            yield True
+
+        sender.close()
+
     def run(self):
         try:
-            
-            o_socket = self.ctx.socket(zmq.PUSH)
-            o_socket.bind('ipc:///tmp/'+self.name+'.pipe')
-            print("output bound on channel: ", self.name)
-            i_socket = self.ctx.socket(zmq.PULL)
-            i_socket.bind('ipc:///tmp/'+self.name+'.pipe')
-            print("input bound on channel: ", self.name)
-            breaker=False
-            #enter into thread runtime
-            
-            while(not breaker):
-                    
-                #without blocking, check if there is a message being received by the socket
+            print("- post -> opening inbound channel", self.name)
+            socket = self.ctx.socket(zmq.PULL)
+            socket.bind('ipc:///tmp/'+self.name+'_'+self.incoming_label+'.pipe')
+            self.poller.register(socket, zmq.POLLIN)
+            print("- post -> opened inbound channel", self.name)
+            print("- post -> launched channel: "+ self.name)
+
+            o = self.out()
+            next(o)
+
+            while(self.stop_issued.is_set() is False):
                 try:
-                    message = i_socket.recv(flags=zmq.NOBLOCK)
-                    print(message)
+                    socks = dict(self.poller.poll(0))
+                    if socket in socks and socks[socket] == zmq.POLLIN:
+                        #string = socket.recv()
+                        #check for a message, this will not block
+
+                        message = socket.recv()
+
+                        r = pickle.loads(message)
+                        #print(   next(o)+self.name+" -> ")
+                        self._iqueue.put(r)
                 except Exception as e:
                     print(e)
-                    message = None
-                if(message!=None):
-                    print(message)
-                    self._iqueue.put(message)
-                    pass
-                
-                if(not self._oqueue.empty()):
-                    
-                    ob = self._oqueue.get()
-                    print(ob)
-                    msg = pickle.dumps(ob)
-                    print(msg)
-                    o_socket.send(msg)
 
+                if(not self._oqueue.empty()):
+                    next(o) 
+                
+            
             if self.stopped():
+                socket.close()
+                self.ctx.term()
                 return
             else:
                 self.stop()
                 breaker=True
+
             return
         except Exception as e:
             print(e)
             self.stop()
             return(-1)
-
+    
     def stop(self):
         #set stop event
-        print("worker ", self.filename, " stopping")
-        self.closeFile()
+        print("- post ->", self.name, "stopping")
         self.stop_issued.set()
+        #self.ctx.term()
+
     
     def stopped(self):
         #check if thread class event has been set
         return self.stop_issued.is_set()
+
+
+
+
+

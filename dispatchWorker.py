@@ -41,7 +41,7 @@ class dispatch:
     def __init__(self):
         print("initializing dispatch...")
         self.fileWorkers = {}
-        self.dispatchWorkers = {}
+        self.channels = {}
         #should spawn threads for each worker? that are responsible for listening on specific pipe and placing on appropriate queue
         for found in self.files_available():
             inq = Queue()
@@ -52,13 +52,20 @@ class dispatch:
             self.fileWorkers[found] = {'thread': fileWorker.worker(found, inq, ouq),'input': inq, 'output': ouq}
             self.fileWorkers[found]['thread'].start()
 
-            self.dispatchWorkers[found] = worker(found, self.fileWorkers[found], False)
-            self.dispatchWorkers[found].start()
+            inq_z = Queue()
+            ouq_z = Queue()
+            self.channels[found] = {"channel": post.channel(found, "server", inq_z, ouq_z), 'input': inq_z, 'output': ouq_z}
+            self.channels[found]['channel'].start()
+            
 
 
             #self.fileWorkers[found]['thread'].run()
             #self.fileWorkers[found].run()
-        
+    def exit(self):
+        for i in self.fileWorkers.keys():
+            self.fileWorkers[i]['thread'].stop()
+        for i in self.channels.keys():
+            self.channels[i]['channel'].stop()
 
     def files_available(self):
         available_files = []
@@ -70,75 +77,9 @@ class dispatch:
 
 
 
-class worker(threading.Thread):
-    # dispatch worker class
-    # as an argument, takes 
-    #   name
-    #       the name of the dispatch worker which also serves as the channel address
-    #   fw
-    #       the fileworker which this dispatch worker will manage & operate
-    #   sig
-    #       a signal variable for control from the main thread
-    #
-    # 
 
-    def __init__(self, name, fw, sig):
-
-
-        print("spawning dispatch worker for " + name)
-
-        threading.Thread.__init__(self)
-        self.stop_issued = threading.Event()
-        inq_z, ouq_z = Queue(), Queue()
-        self.name = name
-        self.managed_fw = fw
-        self.sig = sig
-        self.channel = post.channel(self.name, inq_z, ouq_z)
-        self.channel.start()
-        self.work = Queue()
-        pass
-    #thread methods
-    #thread runtime
-    def run(self):
-        try:
-            breaker=False
-            #enter into thread runtime
-            #begin passive reception. this should listen for any updates on the channel and place them on the inbound queue where we can get them at our leisure.
-            #inboundRequest = self.channel.receive()
-            #print("dispatch worker, channel: ", self.name, " has launched passive reception")
-            while(not breaker):
-                #do while breaker is not tripped by one of the kill conditions
-                #if the request queue is not empty
-
-                #get any new requests
-                
-                #if(self.channel.getIQ()):
-                    #print("ok")
-                pass
-
-            if self.stopped():
-                return
-            else:
-                self.stop()
-                breaker=True
-            return
-        except Exception as e:
-            print(e)
-            self.stop()
-            return(-1)
-    
-    def stop(self):
-        #set stop event
-        print("dispatch worker ", self.name, " stopping")
-        self.closeFile()
-        self.stop_issued.set()
-    
-    def stopped(self):
-        #check if thread class event has been set
-        return self.stop_issued.is_set()
-
-    
 
 a = dispatch()
-
+time.sleep(10)
+a.exit()
 #a.test()

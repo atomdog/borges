@@ -18,7 +18,7 @@ import os
 
 class worker(threading.Thread):
     def __init__(self, filename, iq, oq):
-        print("spawning worker for " + filename)
+        print("- fileworker -> spawning worker for " + filename)
         self.filename = filename
         self.open = False
         self.h5file = None
@@ -51,14 +51,14 @@ class worker(threading.Thread):
         return(file_exists)
     
     def openFile(self):
-        print("worker opening " + self.filename)
+        print("- fileworker -> worker opening " + self.filename)
         self.h5file = tables.open_file("data/"+self.filename+".h5", mode="a", title="constructedlog")
         self.table = self.h5file.root.group0.table0
         self.open = True
         return(True)
     
     def closeFile(self):
-        print("worker closing " + self.filename)
+        print("- fileworker -> worker closing " + self.filename)
         if(self.table is not None):
             self.table.flush()
             self.h5file.close()
@@ -160,7 +160,7 @@ class worker(threading.Thread):
     
     def stop(self):
         #set stop event
-        print("worker ", self.filename, " stopping")
+        print("- fileworker -> worker ", self.filename, " stopping")
         self.closeFile()
         self.stop_issued.set()
     
