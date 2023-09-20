@@ -56,6 +56,8 @@ def print_header():
 ||                Data Management System            ||
 ||                      AMG                         ||
     '''
+
+
     print(banner)
 class dispatch:
     def __init__(self):
