@@ -72,7 +72,8 @@ class worker(threading.Thread):
         for name in names:
             columnIDs.append(name)
         rowCount = len(self.table)
-        return(columnIDs, rowCount)
+        print("- fileworker -> worker described " + self.filename + ": " + str([columnIDs, rowCount]))
+        return([columnIDs, rowCount])
     
     def appendRow(self, new_row):
         r = self.table.row
@@ -145,15 +146,21 @@ class worker(threading.Thread):
                             print("- fileworker -> worker ", self.filename, " beginning task:", cflow['ID'])
                             controlflow = cflow['COMMAND']
                             args = cflow['ARGS']
-                            if(args != 'None'):
-                                o = self.control[controlflow](self, args)
+                            if(self.open == True or controlflow == 'opx'):
+                                if(args != 'None'):
+                                    o = self.control[controlflow](self, args)
+                                else:
+                                    o = self.control[controlflow](self)
                             else:
-                                o = self.control[controlflow](self)
+                                o = '<Err: File Not Open>'
                             #place on output queue
                             cflow["TYPE"] = "RESPONSE"
                             cflow["BODY"] = o
+                            print(cflow)
                         except Exception as e:
-                            cflow["BODY"] = o
+                            print(e)
+                            cflow["BODY"] = e
+
                         
                         self._oqueue.put(cflow)
                         time.sleep(0.1)
