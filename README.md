@@ -4,8 +4,8 @@ the main purpose is to allow multiple client processes to read and write to a se
 ## what everything does
 - post is responsible for communication
 -- a post channel is a object to interact with a thread that handles ZeroMQ input and output to other processes in an asynchronous fashion 
-- dispatchWorker is responsible for launching fileWorkers and channels
--- this routes requests to clients to the proper fileworker for execution, and then routes the responses back to the client
+- <b>dispatchWorker</b> is responsible for launching fileWorkers and channels
+-- this routes requests from clients to the proper fileworker for execution, and then routes the responses back to the client
 - fileworkers are threads which handle all I/O on files
 - borgesClient is just a wrapper for a post channel and a little bit of logic that makes interacting with it in a non-async context not super miserable
 
