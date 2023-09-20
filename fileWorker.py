@@ -132,21 +132,31 @@ class worker(threading.Thread):
                     #get the controlcode passed to the thread    
                     cflow = self._iqueue.get()
                     #if a list w/ arguments is passed, split and run with arguments
+
+                    # !!!!!!!!!!
+                    # This could easily be changed to a dict! It would probably be better!
+                    #
+                    # 
+                    # !!!!!!!!!!
                     if isinstance(cflow, list):
                         controlflow, args = cflow[0], cflow[1]
-                    else:
-                        controlflow = cflow
-                    try:
-                        if(args is not None):
-                            o = self.control[controlflow](self, args)
-                        else:
-                            o = self.control[controlflow](self)
-                        #place on output queue
-                        self._oqueue.put(o)
+                    elif isinstance(cflow, dict):
+                        try:
+                            print("- fileworker -> worker ", self.filename, " beginning task:", cflow['ID'])
+                            controlflow = cflow['COMMAND']
+                            args = cflow['ARGS']
+                            if(args != 'None'):
+                                o = self.control[controlflow](self, args)
+                            else:
+                                o = self.control[controlflow](self)
+                            #place on output queue
+                            cflow["TYPE"] = "RESPONSE"
+                            cflow["BODY"] = o
+                        except Exception as e:
+                            cflow["BODY"] = o
+                        
+                        self._oqueue.put(cflow)
                         time.sleep(0.1)
-                    except Exception as e:
-                        self._oqueue.put(e)
-                        pass
             if self.stopped():
                 return
             else:

@@ -40,14 +40,14 @@ def print_header():
 ||                                                  ||
 ||                                                  ||
 ||⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
-||⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬢⬡⬡⬡⬡⬢⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
+||⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
 ||⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬢⬡⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡||
 ||⬡⬡⬡⬢⬢⬢⬢⬢⬢⬡⬡⬡⬢⬢⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡||
 ||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬢⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡||
-||⬡⬡⬡⬢⬢⬡⬡⬡⬡⬢⬢⬡⬢⬢⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬢⬢⬢⬢⬢⬡⬡⬢⬢⬢⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬡⬢⬢⬡⬢⬢⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬢⬢⬢⬢⬢⬡⬡⬡⬢⬢⬢⬢⬡⬡⬡||
 ||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬢⬢⬡⬡⬢⬢⬢⬢⬡⬡⬢⬢⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡||
 ||⬡⬡⬡⬢⬢⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬢⬡⬡⬡⬢⬢⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡||
-||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬢⬡⬡⬡⬡⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬡⬡⬡⬡||
+||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬢⬡⬡⬡⬡⬢⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬡⬡⬡⬡||
 ||⬡⬡⬡⬢⬢⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡||
 ||⬡⬡⬡⬢⬢⬡⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬡⬡⬡||
 ||⬡⬡⬡⬢⬢⬡⬡⬡⬢⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬡⬢⬢⬢⬢⬡⬡⬡⬡||
@@ -59,9 +59,10 @@ def print_header():
     print(banner)
 class dispatch:
     def __init__(self):
-        print("initializing dispatch...")
+        print("dispatch > initializing...")
         self.fileWorkers = {}
         self.channels = {}
+        self.live = True
         #should spawn threads for each worker? that are responsible for listening on specific pipe and placing on appropriate queue
         for found in self.files_available():
             inq = Queue()
@@ -81,7 +82,8 @@ class dispatch:
 
             #self.fileWorkers[found]['thread'].run()
             #self.fileWorkers[found].run()
-    def exit(self):
+    def shutdown(self):
+        print("dispatch > beginning shutdown...")
         for i in self.fileWorkers.keys():
             self.fileWorkers[i]['thread'].stop()
         for i in self.channels.keys():
@@ -95,12 +97,20 @@ class dispatch:
         return(available_files)
 
     def runtime(self):
-        while(True):
-            for i in self.channels.keys():
-                if(self.channels[i]['input'].empty() == False):
-                    rec = self.channels[i]['input'].get()
-                    print(rec)
-                
+        while(self.live):
+            try:
+                for i in self.channels.keys():
+                    if(self.channels[i]['input'].empty() == False):
+                        rec = self.channels[i]['input'].get()
+                        print(rec)
+                        self.fileWorkers[i]['input'].put(rec)
+                    if(self.fileWorkers[i]['output'].empty() == False):
+                        rep = self.fileWorkers[i]['output'].get()
+                        print(rep)
+                        self.channels[i]['output'].put(rep)
+            except Exception as e:
+                self.shutdown()
+                pass
 
     
 
