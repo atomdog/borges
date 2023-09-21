@@ -69,8 +69,6 @@ class dispatch:
         for found in self.files_available():
             inq = Queue()
             ouq = Queue()
-            inq_z = Queue()
-            ouq_z = Queue()
 
             self.fileWorkers[found] = {'thread': fileWorker.worker(found, inq, ouq),'input': inq, 'output': ouq}
             self.fileWorkers[found]['thread'].start()
@@ -88,8 +86,13 @@ class dispatch:
         print("dispatch > beginning shutdown...")
         for i in self.fileWorkers.keys():
             self.fileWorkers[i]['thread'].stop()
+
         for i in self.channels.keys():
+            time.sleep(0.01)
             self.channels[i]['channel'].stop()
+
+        print("dispatch > completed shutdown...")
+        return(True)
 
     def files_available(self):
         available_files = []
@@ -99,6 +102,7 @@ class dispatch:
         return(available_files)
 
     def runtime(self):
+        
         while(self.live):
             try:
                 for i in self.channels.keys():
@@ -111,17 +115,21 @@ class dispatch:
                         print(rep)
                         self.channels[i]['output'].put(rep)
             except Exception as e:
-                self.shutdown()
+                print("# Dispatch Exception Occurred...")
+                print(e)
+                
                 pass
 
     
 
 
 if __name__ == "__main__":
-
-    print_header()
-    a = dispatch()
-    a.runtime()
+    try:
+        print_header()
+        a = dispatch()
+        a.runtime()
+    except:
+        a.shutdown()
     #time.sleep(10)
     #a.exit()
 #a.test()

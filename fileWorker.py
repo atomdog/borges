@@ -63,6 +63,7 @@ class worker(threading.Thread):
             self.table.flush()
             self.h5file.close()
         self.open = False
+        print("- fileworker -> worker closed " + self.filename)
         return(True)
     
     def describeFile(self):
@@ -125,7 +126,7 @@ class worker(threading.Thread):
         try:
             breaker=False
             #enter into thread runtime
-            while(not breaker):
+            while(not breaker and not self.stop_issued.is_set()):
                 #do while breaker is not tripped by one of the kill conditions
                 #if the request queue is not empty
                 if(not self._iqueue.empty()):
@@ -165,21 +166,25 @@ class worker(threading.Thread):
                         self._oqueue.put(cflow)
                         time.sleep(0.1)
             if self.stopped():
-                return
+                breaker=True
+                pass
             else:
                 self.stop()
                 breaker=True
-            return
+            #return
         except Exception as e:
             print(e)
             self.stop()
-            return(-1)
-    
+            #return(-1)
+        return(-1)
+        
     def stop(self):
         #set stop event
         print("- fileworker -> worker ", self.filename, " stopping")
-        self.closeFile()
+        if(self.open):
+            self.closeFile()
         self.stop_issued.set()
+        return(-1)
     
     def stopped(self):
         #check if thread class event has been set

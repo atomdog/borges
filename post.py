@@ -9,7 +9,10 @@ import queue
 
 class channel(threading.Thread):
     def __init__(self, name, channel_type, iq, oq):
+        
         threading.Thread.__init__(self)
+        
+
         self.name = name
         
         self._iqueue = iq
@@ -33,9 +36,9 @@ class channel(threading.Thread):
 
     def out(self):
         print("- post -> opening outbound channel", self.name)
-        sender = self.ctx.socket(zmq.PUSH)
+        self.sender = self.ctx.socket(zmq.PUSH)
         
-        sender.connect('ipc:///tmp/'+self.name+'_'+self.outgoing_label+'.pipe')
+        self.sender.connect('ipc:///tmp/'+self.name+'_'+self.outgoing_label+'.pipe')
         print("- post -> opened outbound channel", self.name)
         while(self.stop_issued.is_set() is False):
             try: 
@@ -44,11 +47,12 @@ class channel(threading.Thread):
                     print("- post -> outbound on "+self.name+" -> ")
                     msg = pickle.dumps(msg)
                     try:
-                        sender.send(msg)
+                        self.sender.send(msg)
                     except Exception as e:
                         print(e)
                     #print(msg)
             except:
+                #self.sender.close()
                 pass
 
             yield True
@@ -81,30 +85,34 @@ class channel(threading.Thread):
                         self._iqueue.put(r)
                 except Exception as e:
                     print(e)
+                    break
 
                 if(not self._oqueue.empty()):
                     next(o) 
-                
             
             if self.stopped():
-                socket.close()
-                self.ctx.term()
-                return
+                print("- post - > channel ",self.name, "terminating...")
+                sen = self.sender.close(linger=0)
+                inc = socket.close(linger=0)
+                ctc = self.ctx.term()
+                ctc2 = self.ctx.destroy()
+                return(-1)
+                
+                
             else:
                 self.stop()
                 breaker=True
-
-            return
         except Exception as e:
             print(e)
             self.stop()
-            return(-1)
+        return(-1)
+
     
     def stop(self):
         #set stop event
-        print("- post ->", self.name, "stopping")
         self.stop_issued.set()
         #self.ctx.term()
+        return(-1)
 
     
     def stopped(self):
